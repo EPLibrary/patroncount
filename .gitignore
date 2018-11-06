@@ -1,0 +1,5 @@
+build.xml
+build/*
+ext_libs/*
+manifest.mf
+nbproject/*
