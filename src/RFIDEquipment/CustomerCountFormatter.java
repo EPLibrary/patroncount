@@ -21,7 +21,7 @@ package RFIDEquipment;
  * formatted into a standard format that the database at EPL can consume. 
  * These classes do that job.
  * 
- * @author Andrew Nisbet <andrew.nisbet@epl.ca>
+ * @author Andrew Nisbet andrew.nisbet@epl.ca
  * @version 1.0
  * @since   2018-10-22
  */

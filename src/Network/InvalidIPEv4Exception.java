@@ -18,7 +18,7 @@ package Network;
 
 /**
  * Exception thrown if an incorrect IPv4 address is used, or referenced.
- * @author Andrew Nisbet <andrew.nisbet@epl.ca>
+ * @author Andrew Nisbet andrew.nisbet@epl.ca
  * @version 1.0
  * @since   2018-10-22
  */

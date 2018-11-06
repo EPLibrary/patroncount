@@ -20,7 +20,7 @@ import org.apache.commons.validator.routines.InetAddressValidator;
 
 /**
  * A simple IPv4 class. 
- * @author Andrew Nisbet <andrew.nisbet@epl.ca>
+ * @author Andrew Nisbet andrew.nisbet@epl.ca
  * @version 1.0
  * @since   2018-10-22
  */
@@ -32,7 +32,7 @@ public class GateIPv4
 
     /**
      * Creates GateIPv4 object with a default port of 10001.
-     * @param ipValue 
+     * @param ipValue the IP of the host being queried.
      */
     public GateIPv4(String ipValue)
     {
@@ -94,7 +94,7 @@ public class GateIPv4
     }
 
     /**
-     * @return the IP
+     * @return the IPv4. 
      */
     public String getIp()
     {
@@ -111,7 +111,7 @@ public class GateIPv4
     
     /**
      * Gets the host name for the gate.
-     * @return 
+     * @return The name or IP of the host of the query.
      */
     public String getHost()
     {

@@ -21,7 +21,7 @@ package RFIDEquipment;
  * Creating an entry here is the first step to adding support for 
  * a new customer gate.
  * 
- * @author Andrew Nisbet <andrew.nisbet@epl.ca>
+ * @author Andrew Nisbet andrew.nisbet@epl.ca
  * @version 1.0
  * @since   2018-10-22
  */

@@ -17,9 +17,9 @@
 package RFIDEquipment;
 
 /**
- *
- * @author Andrew Nisbet <andrew.nisbet@epl.ca>
- * @author Andrew Nisbet <andrew.nisbet@epl.ca>
+ * Thrown if a gate can't or hasn't be extended to respond to a given 
+ * type of query.
+ * @author Andrew Nisbet andrew.nisbet@epl.ca
  * @version 1.0
  * @since   2018-10-22
  */

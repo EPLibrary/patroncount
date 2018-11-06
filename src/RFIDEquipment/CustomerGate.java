@@ -28,7 +28,7 @@ import java.util.logging.Logger;
  * request for a given make/model of gate and builds a working instance, ready
  * for running queries against.
  * 
- * @author Andrew Nisbet <andrew.nisbet@epl.ca>
+ * @author Andrew Nisbet andrew.nisbet@epl.ca
  * @version 1.0
  * @since   2018-10-22
  */
@@ -83,7 +83,7 @@ public abstract class CustomerGate
      * {@link #getInstance(RFIDEquipment.SupportedGateType, java.lang.String, boolean)}
      * method.
      * 
-     * @param type 
+     * @param type the query type that the gate is expected to execute.
      */
     public abstract void setQuery(SupportedQueryType type);
     

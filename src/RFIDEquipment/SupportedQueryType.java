@@ -24,7 +24,7 @@ package RFIDEquipment;
  * object controls whether it will respond to a given type of message.
  * @see CustomerGate
  * 
- * @author Andrew Nisbet <andrew.nisbet@epl.ca>
+ * @author Andrew Nisbet andrew.nisbet@epl.ca
  * @version 1.0
  * @since   2018-10-22
  */

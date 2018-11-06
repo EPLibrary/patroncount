@@ -18,7 +18,7 @@ package RFIDEquipment;
 
 /**
  * Formats results from all gate types to a standard output.
- * @author Andrew Nisbet <andrew.nisbet@epl.ca>
+ * @author Andrew Nisbet andrew.nisbet@epl.ca
  * @version 1.0
  * @since   2018-10-22
  */
