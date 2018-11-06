@@ -25,6 +25,11 @@ package RFIDEquipment;
  */
 public class UnsupportedQueryException extends RuntimeException
 {
+    /**
+     * Thrown if a gate can't or hasn't be extended to respond to a given 
+     * type of query.
+     * @param message String to be displayed if the exception occurs.
+     */
     public UnsupportedQueryException(String message)
     {
         System.err.println(message);

@@ -19,8 +19,21 @@ package RFIDEquipment;
 /**
  * Formats results from all gate types to a standard output.
  * @author Andrew Nisbet <andrew.nisbet@epl.ca>
+ * @version 1.0
+ * @since   2018-10-22
  */
 public interface ResultsFormatter
 {
+    /**
+     * Formats the response of a customer gate into a useful message to be 
+     * consumed by other services. 
+     * 
+     * For example, in the case of patron count, the message is converted into 
+     * '{n}|{m}|' message, where both 'n' and 'm' are sum of 
+     * integer counts of all receivers (detectors) within the gate.
+     * 
+     * @param message String of bytes received from the gate.
+     * @return the result of the message sent.
+     */
     public String format(String message);
 }

@@ -21,6 +21,8 @@ import org.apache.commons.validator.routines.InetAddressValidator;
 /**
  * A simple IPv4 class. 
  * @author Andrew Nisbet <andrew.nisbet@epl.ca>
+ * @version 1.0
+ * @since   2018-10-22
  */
 public class GateIPv4
 {

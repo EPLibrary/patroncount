@@ -33,6 +33,8 @@ import java.util.logging.Logger;
  * destination socket.
  * 
  * @author Andrew Nisbet <andrew.nisbet@epl.ca>
+ * @version 1.0
+ * @since   2018-10-22
  */
 public class IOSocket 
 {
@@ -62,6 +64,11 @@ public class IOSocket
         }
     }
     
+    /**
+     * Converts a String into a byte array to be put as raw bytes.
+     * @param s - string that will be converted into an array of bytes.
+     * @return byte array.
+     */
     public static byte[] hexStringToByteArray(String s) 
     {
         int len = s.length();
@@ -73,6 +80,13 @@ public class IOSocket
         return data;
     }
  
+    /**
+     * Used by caller to send a string message over a socket. The message is
+     * converted to a byte array before sending. See {@link #hexStringToByteArray(java.lang.String) }.
+     * 
+     * @param msg - message string to be sent over socket.
+     * @return - string of the response, converted from byte array.
+     */
     public String sendMessage(String msg) 
     {
         byte[] message = IOSocket.hexStringToByteArray(msg);
@@ -85,6 +99,10 @@ public class IOSocket
         return "";
     }
     
+    /**
+     * Reads bytes from a socket and converts them string form.
+     * @return string form of the bytes read from a socket.
+     */
     public String readBytes() 
     {
         byte[] buffer = new byte[500];
@@ -124,6 +142,9 @@ public class IOSocket
         return f.toString();
     }
  
+    /**
+     * Closes the socket connection.
+     */
     public void stopConnection() 
     {
         try 

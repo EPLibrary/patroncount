@@ -24,7 +24,10 @@ package Network;
  */
 public class InvalidIPEv4Exception extends Exception
 {
-    
+    /**
+     * Thrown if a specified v4IP is invalid as defined.
+     * @param message - exception message.
+     */
     public InvalidIPEv4Exception(String message)
     {
         System.err.println(message);

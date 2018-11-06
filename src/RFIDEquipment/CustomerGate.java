@@ -147,6 +147,10 @@ public abstract class CustomerGate
         protected ResultsFormatter formatter;
         protected int timeout;
 
+        /**
+         * Constructor to create a patron gate of type FEIG, one or two aisle.
+         * @param ip v4 IP of the gate.
+         */
         public FeigGate(String ip)
         {
             this.ip        = new GateIPv4(ip, PORT);
@@ -262,6 +266,10 @@ public abstract class CustomerGate
        private final GateIPv4 ip;
        private int timeout;
 
+       /**
+        * Constructor to make a patron gate of 3M manufacture.
+        * @param ip v4 IP of the gate.
+        */
        public ThreeMGate(String ip)
        {
            this.ip        = new GateIPv4(ip, PORT);

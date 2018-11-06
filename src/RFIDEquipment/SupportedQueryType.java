@@ -20,7 +20,9 @@ package RFIDEquipment;
  * This controls what types of queries gates can be asked. It does not mean
  * that a specific gate model will be able to answer this query, so the 
  * developer is expected to determine if, and how the gate could answer a query
- * and add that capability to {@link CustomerGate} nested classes.
+ * and add that capability to {@link CustomerGate} nested classes. Each gate
+ * object controls whether it will respond to a given type of message.
+ * @see CustomerGate
  * 
  * @author Andrew Nisbet <andrew.nisbet@epl.ca>
  * @version 1.0
