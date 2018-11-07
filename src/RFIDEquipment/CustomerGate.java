@@ -236,7 +236,7 @@ public abstract class CustomerGate
     * Concrete implementation of the 3M gate.
     * @author Andrew Nisbet <andrew.nisbet@epl.ca>
     */
-    private static class ThreeMGate extends CustomerGate
+    private static class ThreeMGate extends CustomerGate implements Runnable
     {
         /**
          * The types of queries this type of device supports.
@@ -269,6 +269,7 @@ public abstract class CustomerGate
        private final ResultsFormatter formatter;
        private final GateIPv4 ip;
        private int timeout;
+       private String response;
 
        /**
         * Constructor to make a patron gate of 3M manufacture.
@@ -283,6 +284,7 @@ public abstract class CustomerGate
                     DEBUG
             );
             this.timeout   = 3;
+            this.response  = new String();
         }
 
         @Override
@@ -307,6 +309,25 @@ public abstract class CustomerGate
         @Override
         public String queryGate()
         {
+            run();
+            long t= System.currentTimeMillis();
+            long end = t + (this.timeout * 1000) + 1000;
+            while(System.currentTimeMillis() < end && this.response.isEmpty()) 
+            {
+                try
+                {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException ex)
+                {
+                    Logger.getLogger(CustomerGate.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            return this.formatter.format(this.response);
+        }
+        
+        @Override
+        public void run()
+        {
             IOSocket socket = new IOSocket();
             socket.startConnection(this.ip.getIp(), this.ip.getPort());
             socket.sendMessage(this.QUERY.getMessage());
@@ -322,11 +343,11 @@ public abstract class CustomerGate
                         " didn't respond within " + (this.timeout + 2) +
                         " seconds. Is the gate up and connected to the network?");
             }
-            String response = socket.readBytes();
+            this.response = socket.readBytes();
             // If there is another application connected to the port, you won't get
             // any data, because someone else is hogging the connection so test if 
             // you get any data back. 
-            if (response.length() == 0)
+            if (this.response.length() == 0)
             {
                 System.err.println("Can't read socket. Host:" + this.ip.getIp() 
                         + ", port:" + this.ip.getPort() 
@@ -336,11 +357,11 @@ public abstract class CustomerGate
             {
                 if (DEBUG)
                 {
-                    System.out.println("count data recv'd:" + response);
+                    System.out.println("count data recv'd:" + this.response);
                 }
             }
             socket.stopConnection();
-            return this.formatter.format(response);
+//            return this.formatter.format(response);
         }
         
         @Override
