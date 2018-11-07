@@ -64,14 +64,17 @@ public class Patroncount
         System.out.println(" -s{seconds} Sets the expected delay between having received the query to the");
         System.out.println("   time it takes to respond, after which the gate is deamed to be off line.");
         System.out.println("   Each gate type has its own default value, so you shouldn't need this.");
-        System.out.println(" -t{[3M]|FIEG} defines the type, or manufactureer and model of the target gate.");
+        System.out.println(" -t{[3M]|FEIG|FEIGx1|FEIGx2} defines the type, or manufactureer and model of the target gate.");
         System.out.println("   The default is '3M', in which case -t is optional.");
         System.out.println(" -v display version information then exit.");
         System.out.println(" -x usage message. Same as -h, but consistent with other applications.");
+        // TODO: make this reflect the actual text needed to set the model type.
         for (SupportedGateType s: SupportedGateType.values())
         {
             System.out.println(s);
         }
+        // TODO: add timeout for operations to match the times in the -t flag.
+        // TODO: Exceptions should exit, not hang.
         System.out.println();
         System.out.println("Version: " + VERSION);
         System.exit(0);
@@ -137,16 +140,18 @@ public class Patroncount
                     case "3M": // Add more gate types here, and extend code in CustomerGate.
                         gateType = SupportedGateType._3M_9100_;
                         break;
+                    case "FEIGx1":
                     case "FEIG":
                         gateType = SupportedGateType._FEIG_ID_ISC_LR2500_B_;
                         break;
-                    case "FEIG_DUAL_AISLE":
+                    case "FEIGx2":
                         gateType = SupportedGateType._FEIG_ID_ISC_LR2500_B_DUAL_AISLE;
                         break;
                     default:
-                        throw new UnsupportedOperationException("Unsupported "
+                        System.err.println("**error: "
                                 + "RFID gate type selected. Refrer to "
                                 + "documentation for supported RFID gate types.");
+                        Patroncount.displayHelp();
                 }
             }
             if (cmd.hasOption("h") || cmd.hasOption("x"))
