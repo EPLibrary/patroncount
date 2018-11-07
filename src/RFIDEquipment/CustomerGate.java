@@ -312,14 +312,11 @@ public abstract class CustomerGate
             run();
             long t= System.currentTimeMillis();
             long end = t + (this.timeout * 1000) + 1000;
-            while(System.currentTimeMillis() < end && this.response.isEmpty()) 
+            while(System.currentTimeMillis() < end) 
             {
-                try
+                if ( ! this.response.isEmpty())
                 {
-                    TimeUnit.SECONDS.sleep(1);
-                } catch (InterruptedException ex)
-                {
-                    Logger.getLogger(CustomerGate.class.getName()).log(Level.SEVERE, null, ex);
+                    break;
                 }
             }
             return this.formatter.format(this.response);
