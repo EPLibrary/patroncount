@@ -44,11 +44,11 @@ import org.apache.commons.cli.ParseException;
 public class Patroncount
 {
     private static boolean DEBUG;
-    private final static String VERSION = "0.2";
+    private final static String VERSION = "1.0";
 
     public static void displayHelp()
     {
-        System.out.println("Usage: patroncount.jar [-dhvx] [-i gate_ip] [-t gate_type]");
+        System.out.println("Usage: patroncount.jar [-dhvx] [-i gate_ip] [-t gate_type] [-s {integer}");
         System.out.println(" Exmaple: Patroncount -g 10.2.8.144");
         System.out.println("    Only IPv4 is currently supported. This may change.");
         System.out.println("    This application will query a patron gate for patron in and out counts.");
@@ -81,7 +81,8 @@ public class Patroncount
     {
         // Test using these 2 gates:
 //        String host = "10.2.19.113";  // 3M - IDY gate specifically
-//        String host = "10.2.44.12"; // FEIG - HVY gate specifically
+//        String host = "10.2.44.12"; // FEIGx1 - HVY gate specifically
+//        String host = "10.2.30.38"; // FEIGx2 - LON gate specifically
         // First get the valid options
         Options options = new Options();
         options.addOption("d", false, "turns on debug information.");

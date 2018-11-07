@@ -236,7 +236,7 @@ public abstract class CustomerGate
     * Concrete implementation of the 3M gate.
     * @author Andrew Nisbet <andrew.nisbet@epl.ca>
     */
-    private static class ThreeMGate extends CustomerGate implements Runnable
+    private static class ThreeMGate extends CustomerGate
     {
         /**
          * The types of queries this type of device supports.
@@ -309,22 +309,6 @@ public abstract class CustomerGate
         @Override
         public String queryGate()
         {
-            run();
-            long t= System.currentTimeMillis();
-            long end = t + (this.timeout * 1000) + 1000;
-            while(System.currentTimeMillis() < end) 
-            {
-                if ( ! this.response.isEmpty())
-                {
-                    break;
-                }
-            }
-            return this.formatter.format(this.response);
-        }
-        
-        @Override
-        public void run()
-        {
             IOSocket socket = new IOSocket();
             socket.startConnection(this.ip.getIp(), this.ip.getPort());
             socket.sendMessage(this.QUERY.getMessage());
@@ -358,7 +342,7 @@ public abstract class CustomerGate
                 }
             }
             socket.stopConnection();
-//            return this.formatter.format(response);
+            return this.formatter.format(this.response);
         }
         
         @Override
