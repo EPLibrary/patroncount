@@ -340,7 +340,7 @@ public abstract class CustomerGate
                 }
             }
             socket.stopConnection();
-            return response;
+            return this.formatter.format(response);
         }
         
         @Override
