@@ -313,12 +313,12 @@ public abstract class CustomerGate
             run();
             try
             {
-                TimeUnit.SECONDS.sleep(this.timeout + 2);
+                TimeUnit.SECONDS.sleep(this.timeout + 1);
             } 
             catch (InterruptedException ex)
             {
-                System.err.println("**warn: gate " + this.ip.getHost() +
-                        " didn't respond within " + (this.timeout + 2) +
+                System.err.println("**warn: device " + this.ip.getHost() +
+                        " didn't respond within " + (this.timeout + 1) +
                         " seconds. Is the gate up and connected to the network?");
             }
             return this.formatter.format(this.response);
@@ -337,7 +337,10 @@ public abstract class CustomerGate
             } 
             catch (InterruptedException ex) 
             {
-                Logger.getLogger(ThreeMGate.class.getName()).log(Level.SEVERE, null, ex);
+                // Logger.getLogger(ThreeMGate.class.getName()).log(Level.SEVERE, null, ex);
+                System.err.println("**warn: device " + this.ip.getHost() +
+                        " didn't respond within " + (this.timeout + 2) +
+                        " seconds. Is the gate up and connected to the network?");
             }
             this.response = socket.readBytes();
             // If there is another application connected to the port, you won't get
