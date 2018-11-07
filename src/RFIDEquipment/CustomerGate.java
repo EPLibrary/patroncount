@@ -21,6 +21,7 @@ import Network.GateIPv4;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import patroncount.Patroncount;
 
 /**
  * This application can talk to a number of different gates (that number is 
@@ -57,8 +58,9 @@ public abstract class CustomerGate
                     instance = new FeigGateDualAisle(gateIP);
                     break;
                 default:
-                    throw new UnsupportedOperationException("***error, customer"
+                    System.err.println("***error, customer"
                             + " gate type not supported.");
+                    Patroncount.displayHelp();
             }
         }
         return instance;
@@ -173,15 +175,17 @@ public abstract class CustomerGate
                     this.QUERY = SupportedQueries.CUSTOMER_COUNTS;
                     break;
                 case RESET_COUNTS:
-                    throw new UnsupportedQueryException(
+                    System.err.println(
                             "***error the reset counts command is not "
                             + "supported yet."
                     );
+                    Patroncount.displayHelp();
                 default:
-                    throw new UnsupportedQueryException(
+                    System.err.println(
                             "***error this command is not "
                             + "supported yet."
-                    ); 
+                    );
+                    Patroncount.displayHelp();
             }
         }
         
@@ -232,7 +236,7 @@ public abstract class CustomerGate
     * Concrete implementation of the 3M gate.
     * @author Andrew Nisbet <andrew.nisbet@epl.ca>
     */
-    private static class ThreeMGate extends CustomerGate
+    private static class ThreeMGate extends CustomerGate implements Runnable
     {
         /**
          * The types of queries this type of device supports.
@@ -265,21 +269,23 @@ public abstract class CustomerGate
        private final ResultsFormatter formatter;
        private final GateIPv4 ip;
        private int timeout;
+       private String response;
 
        /**
         * Constructor to make a patron gate of 3M manufacture.
         * @param ip v4 IP of the gate.
         */
-       public ThreeMGate(String ip)
-       {
-           this.ip        = new GateIPv4(ip, PORT);
-           this.QUERY     = SupportedQueries.CUSTOMER_COUNTS;
-           this.formatter = CustomerCountFormatter.getInstance(
-                   SupportedGateType._3M_9100_,
-                   DEBUG
-           );
-           this.timeout   = 3;
-       }
+        public ThreeMGate(String ip)
+        {
+            this.ip        = new GateIPv4(ip, PORT);
+            this.QUERY     = SupportedQueries.CUSTOMER_COUNTS;
+            this.formatter = CustomerCountFormatter.getInstance(
+                    SupportedGateType._3M_9100_,
+                    DEBUG
+            );
+            this.timeout   = 3;
+            this.response  = new String();
+        }
 
         @Override
         public void setQuery(SupportedQueryType type)
@@ -292,53 +298,66 @@ public abstract class CustomerGate
                     this.QUERY = SupportedQueries.CUSTOMER_COUNTS;
                     break;
                 default:
-                    throw new UnsupportedQueryException(
+                    System.err.println(
                             "***error this command is not "
                             + "supported by this gate make and model."
-                    ); 
+                    );
+                    Patroncount.displayHelp();
             }
         }
         
         @Override
-       public String queryGate()
-       {
-           IOSocket socket = new IOSocket();
-           socket.startConnection(this.ip.getIp(), this.ip.getPort());
-           socket.sendMessage(this.QUERY.getMessage());
-           try 
-           {
-               // The old gates needed some delay for the hardware to respond.
-               TimeUnit.SECONDS.sleep(this.timeout);
-           } 
-           catch (InterruptedException ex) 
-           {
-               Logger.getLogger(ThreeMGate.class.getName()).log(Level.SEVERE, null, ex);
-           }
-           String results = socket.readBytes();
-           // If there is another application connected to the port, you won't get
-           // any data, because someone else is hogging the connection so test if 
-           // you get any data back. 
-           if (results.length() == 0)
-           {
-               System.err.println("Can't read socket. Host:" + this.ip.getIp() 
-                       + ", port:" + this.ip.getPort() 
-                       + ". Is another application connected?");
-           }
-           else
-           {
-               if (DEBUG)
-               {
-                   System.out.println("count data recv'd:" + results);
-               }
-           }
-           socket.stopConnection();
-           return this.formatter.format(results);
-       }
-       
+        public String queryGate()
+        {
+            // Set timeout then run query.
+            run();
+            return this.formatter.format(this.response);
+        }
+        
         @Override
-       public void setTimeout(int seconds)
-       {
+        public void run()
+        {
+            long t= System.currentTimeMillis();
+            long end = t + (this.timeout * 1000) + 1000;
+            IOSocket socket = new IOSocket();
+            socket.startConnection(this.ip.getIp(), this.ip.getPort());
+            while(System.currentTimeMillis() < end) 
+            {
+                socket.sendMessage(this.QUERY.getMessage());
+                try 
+                {
+                    // The old gates needed some delay for the hardware to respond.
+                    TimeUnit.SECONDS.sleep(this.timeout);
+                } 
+                catch (InterruptedException ex) 
+                {
+                    Logger.getLogger(ThreeMGate.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                this.response = socket.readBytes();
+                // If there is another application connected to the port, you won't get
+                // any data, because someone else is hogging the connection so test if 
+                // you get any data back. 
+                if (this.response.length() == 0)
+                {
+                    System.err.println("Can't read socket. Host:" + this.ip.getIp() 
+                            + ", port:" + this.ip.getPort() 
+                            + ". Is another application connected?");
+                }
+                else
+                {
+                    if (DEBUG)
+                    {
+                        System.out.println("count data recv'd:" + this.response);
+                    }
+                }
+            }
+            socket.stopConnection();
+        }
+        
+        @Override
+        public void setTimeout(int seconds)
+        {
            this.timeout = seconds;
-       }
+        }
     }
 }

@@ -18,7 +18,6 @@ package patroncount;
 
 import RFIDEquipment.SupportedGateType;
 import RFIDEquipment.CustomerGate;
-import Network.InvalidIPEv4Exception;
 import Network.GateIPv4;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -68,11 +67,6 @@ public class Patroncount
         System.out.println("   The default is '3M', in which case -t is optional.");
         System.out.println(" -v display version information then exit.");
         System.out.println(" -x usage message. Same as -h, but consistent with other applications.");
-        // TODO: make this reflect the actual text needed to set the model type.
-        for (SupportedGateType s: SupportedGateType.values())
-        {
-            System.out.println(s);
-        }
         // TODO: add timeout for operations to match the times in the -t flag.
         // TODO: Exceptions should exit, not hang.
         System.out.println();
@@ -122,7 +116,8 @@ public class Patroncount
                 GateIPv4 gateIp = new GateIPv4(cmd.getOptionValue("i"));
                 if (gateIp.isValid() == false)
                 {
-                    throw new InvalidIPEv4Exception("The IP used with '-i' is invalid.");
+                    System.err.println("The IP used with '-i' is invalid.");
+                    System.exit(11);
                 }
                 ip = cmd.getOptionValue("i");
             }
@@ -163,7 +158,7 @@ public class Patroncount
                 timeout = Integer.parseInt(cmd.getOptionValue("s"));
             }
         } 
-        catch (ParseException | InvalidIPEv4Exception | UnsupportedOperationException ex)
+        catch (ParseException | UnsupportedOperationException ex)
         {
             Logger.getLogger(Patroncount.class.getName()).log(Level.SEVERE, null, ex);
         }
