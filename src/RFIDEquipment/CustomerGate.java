@@ -311,44 +311,49 @@ public abstract class CustomerGate
         {
             // Set timeout then run query.
             run();
+            try
+            {
+                TimeUnit.SECONDS.sleep(this.timeout + 2);
+            } 
+            catch (InterruptedException ex)
+            {
+                System.err.println("**warn: gate " + this.ip.getHost() +
+                        " didn't respond within " + (this.timeout + 2) +
+                        " seconds. Is the gate up and connected to the network?");
+            }
             return this.formatter.format(this.response);
         }
         
         @Override
         public void run()
         {
-            long t= System.currentTimeMillis();
-            long end = t + (this.timeout * 1000) + 1000;
             IOSocket socket = new IOSocket();
             socket.startConnection(this.ip.getIp(), this.ip.getPort());
-            while(System.currentTimeMillis() < end) 
+            socket.sendMessage(this.QUERY.getMessage());
+            try 
             {
-                socket.sendMessage(this.QUERY.getMessage());
-                try 
+                // The old gates needed some delay for the hardware to respond.
+                TimeUnit.SECONDS.sleep(this.timeout);
+            } 
+            catch (InterruptedException ex) 
+            {
+                Logger.getLogger(ThreeMGate.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            this.response = socket.readBytes();
+            // If there is another application connected to the port, you won't get
+            // any data, because someone else is hogging the connection so test if 
+            // you get any data back. 
+            if (this.response.length() == 0)
+            {
+                System.err.println("Can't read socket. Host:" + this.ip.getIp() 
+                        + ", port:" + this.ip.getPort() 
+                        + ". Is another application connected?");
+            }
+            else
+            {
+                if (DEBUG)
                 {
-                    // The old gates needed some delay for the hardware to respond.
-                    TimeUnit.SECONDS.sleep(this.timeout);
-                } 
-                catch (InterruptedException ex) 
-                {
-                    Logger.getLogger(ThreeMGate.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                this.response = socket.readBytes();
-                // If there is another application connected to the port, you won't get
-                // any data, because someone else is hogging the connection so test if 
-                // you get any data back. 
-                if (this.response.length() == 0)
-                {
-                    System.err.println("Can't read socket. Host:" + this.ip.getIp() 
-                            + ", port:" + this.ip.getPort() 
-                            + ". Is another application connected?");
-                }
-                else
-                {
-                    if (DEBUG)
-                    {
-                        System.out.println("count data recv'd:" + this.response);
-                    }
+                    System.out.println("count data recv'd:" + this.response);
                 }
             }
             socket.stopConnection();

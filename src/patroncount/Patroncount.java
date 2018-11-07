@@ -144,7 +144,7 @@ public class Patroncount
                         break;
                     default:
                         System.err.println("**error: "
-                                + "RFID gate type selected. Refrer to "
+                                + "invalid RFID gate type selected. Refrer to "
                                 + "documentation for supported RFID gate types.");
                         Patroncount.displayHelp();
                 }
