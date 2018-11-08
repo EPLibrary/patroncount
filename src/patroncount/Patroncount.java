@@ -19,6 +19,7 @@ package patroncount;
 import RFIDEquipment.SupportedGateType;
 import RFIDEquipment.CustomerGate;
 import Network.GateIPv4;
+import RFIDEquipment.CustomerCountFormatter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.cli.BasicParser;
@@ -44,34 +45,38 @@ import org.apache.commons.cli.ParseException;
 public class Patroncount
 {
     private static boolean DEBUG;
-    private final static String VERSION = "1.0";
+    private final static String VERSION = "1.1";
 
-    public static void displayHelp()
+    public static void displayHelp(int i)
     {
-        System.out.println("Usage: patroncount.jar [-dhvx] [-i gate_ip] [-t gate_type] [-s {integer}");
-        System.out.println(" Exmaple: Patroncount -g 10.2.8.144");
-        System.out.println("    Only IPv4 is currently supported. This may change.");
-        System.out.println("    This application will query a patron gate for patron in and out counts.");
-	System.out.println("    If successful it will print 'in_count|out_count|'. On failure it will");
-	System.out.println("    output '-1|-1|'. A timeout or any SocketException will cause failure.");
-        System.out.println(" The application currently supports the following RFID gate models.");
-        System.out.println();
-        System.out.println(" Switches:");
-        System.out.println(" -d output debug information.");
-        System.out.println(" -h usage message.");
-        System.out.println(" -i{10.0.0.127} the IPv4 address of the target gate.");
-        System.out.println(" -s{seconds} Sets the expected delay between having received the query to the");
-        System.out.println("   time it takes to respond, after which the gate is deamed to be off line.");
-        System.out.println("   Each gate type has its own default value, so you shouldn't need this.");
-        System.out.println(" -t{[3M]|FEIG|FEIGx1|FEIGx2} defines the type, or manufactureer and model of the target gate.");
-        System.out.println("   The default is '3M', in which case -t is optional.");
-        System.out.println(" -v display version information then exit.");
-        System.out.println(" -x usage message. Same as -h, but consistent with other applications.");
+        System.err.println("Usage: patroncount.jar [-dhvx] [-i gate_ip] [-t gate_type] [-s {integer}]");
+        System.err.println(" Exmaple: Patroncount -g 10.2.19.113");
+        System.err.println("    Only IPv4 is currently supported. This may change.");
+        System.err.println("    This application will query a patron gate for patron in and out counts.");
+	System.err.println("    If successful it will print 'in_count|out_count|'. On failure it will");
+	System.err.println("    output '-1|-1|'. A timeout or any SocketException will cause failure.");
+        System.err.println(" The application currently supports the following RFID gate models.");
+        System.err.println();
+        System.err.println(" Switches:");
+        System.err.println(" -d output debug information.");
+        System.err.println(" -h usage message.");
+        System.err.println(" -i{10.0.0.127} the IPv4 address of the target gate.");
+        System.err.println(" -s{seconds} Sets the expected delay between having received the query to the");
+        System.err.println("   time it takes to respond, after which the gate is deemed to be off line.");
+        System.err.println("   Each gate type has its own default value, so you shouldn't need this.");
+        System.err.println(" -t{[3M]|[FEIG|FEIGx1]|FEIGx2|OFFLINE} (case insensitive)");
+        System.err.println("   Specifies the type, (model and manufacturer) of the target gate.");
+        System.err.println("   The default is '3M', in which case -t is optional.");
+        System.err.println("   FEIG and FEIGx1 are equivalent.");
+        System.err.println("   'offline', 'unknown', 'Undefined' are all equivalent and will "
+                + "always return '-1|-1|'.");
+        System.err.println(" -v display version information then exit.");
+        System.err.println(" -x usage message. Same as -h, but consistent with other applications.");
         // TODO: add timeout for operations to match the times in the -t flag.
         // TODO: Exceptions should exit, not hang.
-        System.out.println();
-        System.out.println("Version: " + VERSION);
-        System.exit(0);
+        System.err.println();
+        System.err.println("Version: " + VERSION);
+        System.exit(i);
     }
     
     /**
@@ -105,7 +110,7 @@ public class Patroncount
             cmd = parser.parse(options, args);
             if (cmd.hasOption("v"))
             {
-                System.out.println("Patroncount version: " + Patroncount.VERSION);
+                System.err.println("Patroncount version: " + Patroncount.VERSION);
                 return;
             }
             if (cmd.hasOption("d")) // Turn on debug
@@ -117,42 +122,47 @@ public class Patroncount
                 GateIPv4 gateIp = new GateIPv4(cmd.getOptionValue("i"));
                 if (gateIp.isValid() == false)
                 {
-                    System.err.println("The IP used with '-i' is invalid.");
-                    System.exit(11);
+                    System.err.println("**error: the IP used with '-i' is invalid.");
+                    Patroncount.displayHelp(1);
                 }
                 ip = cmd.getOptionValue("i");
             }
             else
             {
-                System.err.println("Patroncount requires a valid IP specified"
+                System.err.println("**error: patroncount requires a valid IP specified"
                         + " with the '-i' flag to do anything useful.");
-                Patroncount.displayHelp();
+                Patroncount.displayHelp(1);
             }
             // Gate type specification.
             if (cmd.hasOption("t")) // location of the pidFile, default is current directory (relative to jar location).
             {
-                switch (cmd.getOptionValue("t"))
+                switch (cmd.getOptionValue("t").toUpperCase())
                 {
                     case "3M": // Add more gate types here, and extend code in CustomerGate.
                         gateType = SupportedGateType._3M_9100_;
                         break;
-                    case "FEIGx1":
+                    case "FEIGX1":
                     case "FEIG":
                         gateType = SupportedGateType._FEIG_ID_ISC_LR2500_B_;
                         break;
-                    case "FEIGx2":
-                        gateType = SupportedGateType._FEIG_ID_ISC_LR2500_B_DUAL_AISLE;
+                    case "FEIGX2":
+                        gateType = SupportedGateType._FEIG_ID_ISC_LR2500_B_DUAL_AISLE_;
+                        break;
+                    case "UNDEFINED":
+                    case "UNKNOWN":
+                    case "OFFLINE":
+                        gateType = SupportedGateType._DUMMY_;
                         break;
                     default:
                         System.err.println("**error: "
                                 + "invalid RFID gate type selected. Refrer to "
                                 + "documentation for supported RFID gate types.");
-                        Patroncount.displayHelp();
+                        Patroncount.displayHelp(1);
                 }
             }
             if (cmd.hasOption("h") || cmd.hasOption("x"))
             {
-                Patroncount.displayHelp();
+                Patroncount.displayHelp(0);
             }
             if (cmd.hasOption("s"))
             {

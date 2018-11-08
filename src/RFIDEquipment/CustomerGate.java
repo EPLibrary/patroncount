@@ -54,13 +54,16 @@ public abstract class CustomerGate
                 case _FEIG_ID_ISC_LR2500_B_:
                     instance = new FeigGate(gateIP);
                     break;
-                case _FEIG_ID_ISC_LR2500_B_DUAL_AISLE:
+                case _FEIG_ID_ISC_LR2500_B_DUAL_AISLE_:
                     instance = new FeigGateDualAisle(gateIP);
+                    break;
+                case _DUMMY_:
+                    instance = new DummyGate(gateIP);
                     break;
                 default:
                     System.err.println("***error, customer"
                             + " gate type not supported.");
-                    Patroncount.displayHelp();
+                    Patroncount.displayHelp(1);
             }
         }
         return instance;
@@ -96,6 +99,102 @@ public abstract class CustomerGate
      */
     public abstract String queryGate();
     
+    private static class DummyGate extends CustomerGate
+    {
+        /**
+         * The types of queries this type of device supports.
+         */
+        protected enum SupportedQueries
+        {
+            CUSTOMER_COUNTS("customer_counts"),
+            RESET_GATE("reset");
+
+            private final String type;
+
+            private SupportedQueries(String s)
+            {
+                this.type = s;
+            }
+
+            @Override
+            public String toString()
+            {
+                return this.type;
+            }
+
+            public String getMessage()
+            {
+                return this.type;
+            }
+        }
+        // Set the correct port for this type of gate, since the gateIP has 
+        // a default of 10001.
+        protected final static int PORT = 10001;
+        protected final GateIPv4 ip;
+        protected SupportedQueries QUERY;
+        protected ResultsFormatter formatter;
+        private String results;
+        
+        public DummyGate(String ip)
+        {
+            this.ip        = new GateIPv4(ip, PORT);
+            this.QUERY     = SupportedQueries.CUSTOMER_COUNTS;
+            this.formatter = CustomerCountFormatter.getInstance(
+                    SupportedGateType._DUMMY_, 
+                    DEBUG
+            );
+            this.results   = "<response>";
+        }
+        
+        @Override
+        public void setTimeout(int seconds)
+        {  }
+        
+        /**
+         * Allows a dummy gate object to display a specific message as it would
+         * if connected to a real gate.
+         * 
+         * @param message 
+         */
+        public void setTestMessage(String message)
+        {
+            this.results = message;
+        }
+
+        @Override
+        public void setQuery(SupportedQueryType type)
+        {
+            // FIEG gates can support 2 useful queries, customer counts and
+            // reset counts (not implemented yet).
+            switch(type)
+            {
+                case CUSTOMER_COUNTS:
+                    this.QUERY = SupportedQueries.CUSTOMER_COUNTS;
+                    break;
+                case RESET_COUNTS:
+                    this.QUERY = SupportedQueries.RESET_GATE;
+                    break;
+                default:
+                    System.err.println(
+                            "***error this command is not "
+                            + "supported yet."
+                    );
+                    Patroncount.displayHelp(1);
+            }
+        }
+
+        @Override
+        public String queryGate()
+        {
+            if (DEBUG)
+            {
+                System.out.println("count data recv'd:" + results);
+            }
+            return this.formatter.format(results);
+        }
+        
+    }
+    
     /** An alternate type of gate from Bibliotheca that has recorders for more
      * than one aisle.
      */
@@ -104,12 +203,12 @@ public abstract class CustomerGate
         public FeigGateDualAisle(String ip)
         {
             super(ip);
-            this.formatter = CustomerCountFormatter.getInstance(
-                    SupportedGateType._FEIG_ID_ISC_LR2500_B_DUAL_AISLE, 
+            this.formatter = CustomerCountFormatter.getInstance(SupportedGateType._FEIG_ID_ISC_LR2500_B_DUAL_AISLE_, 
                     DEBUG
             );
         }
     }
+    
     /**
      * Customer gate type manufactured by FEIG GmB. One of types of gates
      * EPL has purchased.
@@ -179,13 +278,13 @@ public abstract class CustomerGate
                             "***error the reset counts command is not "
                             + "supported yet."
                     );
-                    Patroncount.displayHelp();
+                    Patroncount.displayHelp(1);
                 default:
                     System.err.println(
                             "***error this command is not "
                             + "supported yet."
                     );
-                    Patroncount.displayHelp();
+                    Patroncount.displayHelp(1);
             }
         }
         
@@ -302,7 +401,7 @@ public abstract class CustomerGate
                             "***error this command is not "
                             + "supported by this gate make and model."
                     );
-                    Patroncount.displayHelp();
+                    Patroncount.displayHelp(1);
             }
         }
         

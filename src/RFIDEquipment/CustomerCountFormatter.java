@@ -42,14 +42,64 @@ public abstract class CustomerCountFormatter implements ResultsFormatter
             case _FEIG_ID_ISC_LR2500_B_:
                 instance = new FeigCustomerCountFormatter();
                 break;
-            case _FEIG_ID_ISC_LR2500_B_DUAL_AISLE:
+            case _FEIG_ID_ISC_LR2500_B_DUAL_AISLE_:
                 instance = new FeigCustomerCountDualAisleFormatter();
+                break;
+            case _DUMMY_:
+                instance = new DummyCustomerCountFormatter();
                 break;
             default:
                 throw new UnsupportedOperationException("***error, unsupported "
                         + "output formatter type requiested.");
         }
         return instance;
+    }
+    
+    /**
+     * Instance of a dummy gate. This is a convenience class for testing or if 
+     * a gate is shown to be offline, or if you need results to be output even
+     * if the gate can't be reached.
+     */
+    private static class DummyCustomerCountFormatter extends CustomerCountFormatter
+    {
+        /**
+         * If the message string is empty the default output is '-1|-1|'. If 
+         * the message is not empty the message itself is output. Essentially
+         * no conversion occurs whatever.
+         * 
+         * @param message values to be displayed.
+         * @return Formatted message string.
+         */
+        @Override
+        public String format(String message)
+        {
+            String result = "-1|-1|";
+            // If there is another application connected to the port, you won't get
+            // any data, because someone else is hogging the connection so test if 
+            // you get any data back.
+            try
+            {
+                // Return the count.
+                if (DEBUG)
+                {
+                    System.err.println("count data recv'd: '" + message + "'");
+                }
+                if (message.length() == 0 
+                        || message.compareToIgnoreCase("<response>") == 0)
+                {
+                    return result;
+                }
+                result = message;
+            } 
+            catch (NullPointerException ex)
+            {
+                if (DEBUG)
+                {
+                    System.err.println("count data recv'd: 'null'");
+                }
+            }
+            return result;
+        }
     }
     
     /**
@@ -61,24 +111,31 @@ public abstract class CustomerCountFormatter implements ResultsFormatter
         public String format(String message)
         {
             String result = "-1|-1|";
-            // If there is another application connected to the port, you won't get
-            // any data, because someone else is hogging the connection so test if 
-            // you get any data back.
-            if (message.length() == 0)
-            {
-                return result;
-            }
-            else
+            try
             {
                 // Return the count.
                 if (DEBUG)
                 {
-                    System.out.println("count data recv'd:" + message);
+                    System.err.println("count data recv'd: '" + message + "'");
+                }
+                // If there is another application connected to the port, you won't get
+                // any data, because someone else is hogging the connection so test if 
+                // you get any data back.
+                if (message.length() == 0)
+                {
+                    return result;
                 }
                 long outCount = Long.parseLong(message.substring(11, 18), 16);
                 long inCount = Long.parseLong(message.substring(19, 26), 16);
                 // or more like patroncount: 'in|out|'
                 result = String.valueOf(inCount) + "|" + String.valueOf(outCount) + "|";
+            } 
+            catch (NullPointerException ex)
+            {
+                if (DEBUG)
+                {
+                    System.err.println("count data recv'd: 'null'");
+                }
             }
             return result;
         }
@@ -93,24 +150,34 @@ public abstract class CustomerCountFormatter implements ResultsFormatter
         public String format(String message)
         {
             String result = "-1|-1|";
-            // If there is another application connected to the port, you won't get
-            // any data, because someone else is hogging the connection so test if 
-            // you get any data back.
-            if (message.length() == 0)
+            try
             {
-                return result;
-            }
-            else
+                // If there is another application connected to the port, you won't get
+                // any data, because someone else is hogging the connection so test if 
+                // you get any data back.
+                if (message.length() == 0)
+                {
+                    return result;
+                }
+                else
+                {
+                    // Display the count.
+                    if (DEBUG)
+                    {
+                        System.err.println("count data recv'd:" + message);
+                    }
+                    long inCount = Long.parseLong(message.substring(24, 32), 16);
+                    long outCount = Long.parseLong(message.substring(32, 40), 16);
+                    // or more like patroncount: 'in|out|'
+                    result = String.valueOf(inCount) + "|" + String.valueOf(outCount) + "|";
+                }
+            } 
+            catch (NullPointerException ex)
             {
-                // Display the count.
                 if (DEBUG)
                 {
-                    System.out.println("count data recv'd:" + message);
+                    System.err.println("count data recv'd: 'null'");
                 }
-                long inCount = Long.parseLong(message.substring(24, 32), 16);
-                long outCount = Long.parseLong(message.substring(32, 40), 16);
-                // or more like patroncount: 'in|out|'
-                result = String.valueOf(inCount) + "|" + String.valueOf(outCount) + "|";
             }
             return result;
         }
@@ -129,37 +196,47 @@ public abstract class CustomerCountFormatter implements ResultsFormatter
         public String format(String message)
         {
             String result = "-1|-1|";
-            // If there is another application connected to the port, you won't get
-            // any data, because someone else is hogging the connection so test if 
-            // you get any data back.
-            if (message.length() == 0)
+            try
             {
-                return result;
-            }
-            else
+                // If there is another application connected to the port, you won't get
+                // any data, because someone else is hogging the connection so test if 
+                // you get any data back.
+                if (message.length() == 0)
+                {
+                    return result;
+                }
+                else
+                {
+                    // Display the count.
+                    if (DEBUG)
+                    {
+                        System.err.println("count data recv'd:" + message);
+                    }
+                    // 02 00 20 00 9F 00 02 00 18 01 77 00 [00 00 0D 13] [00 00 14 B0] [00 00 11 8A] [00 00 11 E0] EA EB 81 A3 OK
+                    //
+                    //Radar Detector 1 Counter 1
+                    //Radar Detector 1 Counter 2
+                    //Radar Detector 2 Counter 1
+                    //Radar Detector 2 Counter 2
+                    long inCountOne = Long.parseLong(message.substring(24, 32), 16);
+                    long outCountOne = Long.parseLong(message.substring(32, 40), 16);
+                    // Second aisle
+                    long inCountTwo = Long.parseLong(message.substring(40, 48), 16);
+                    long outCountTwo = Long.parseLong(message.substring(48, 56), 16);
+                    // The count on the display is the sum of inCountOne and inCountTwo
+                    // the out count on the display is sum of outCountOne and outCountTwo.
+                    long inCount = inCountOne + inCountTwo;
+                    long outCount = outCountOne + outCountTwo;
+                    // or more like patroncount: 'in|out|'
+                    result = String.valueOf(inCount) + "|" + String.valueOf(outCount) + "|";
+                }
+            } 
+            catch (NullPointerException ex)
             {
-                // Display the count.
                 if (DEBUG)
                 {
-                    System.out.println("count data recv'd:" + message);
+                    System.err.println("count data recv'd: 'null'");
                 }
-                // 02 00 20 00 9F 00 02 00 18 01 77 00 [00 00 0D 13] [00 00 14 B0] [00 00 11 8A] [00 00 11 E0] EA EB 81 A3 OK
-                //
-                //Radar Detector 1 Counter 1
-                //Radar Detector 1 Counter 2
-                //Radar Detector 2 Counter 1
-                //Radar Detector 2 Counter 2
-                long inCountOne = Long.parseLong(message.substring(24, 32), 16);
-                long outCountOne = Long.parseLong(message.substring(32, 40), 16);
-                // Second aisle
-                long inCountTwo = Long.parseLong(message.substring(40, 48), 16);
-                long outCountTwo = Long.parseLong(message.substring(48, 56), 16);
-                // The count on the display is the sum of inCountOne and inCountTwo
-                // the out count on the display is sum of outCountOne and outCountTwo.
-                long inCount = inCountOne + inCountTwo;
-                long outCount = outCountOne + outCountTwo;
-                // or more like patroncount: 'in|out|'
-                result = String.valueOf(inCount) + "|" + String.valueOf(outCount) + "|";
             }
             return result;
         }

@@ -29,7 +29,8 @@ public enum SupportedGateType
 {
     _3M_9100_("3M 9100"),
     _FEIG_ID_ISC_LR2500_B_("FEIG LR2500"),
-    _FEIG_ID_ISC_LR2500_B_DUAL_AISLE("FEIG LR2500 DUAL AISLE");
+    _FEIG_ID_ISC_LR2500_B_DUAL_AISLE_("FEIG LR2500 DUAL AISLE"),
+    _DUMMY_("OFFLINE");
     
     private String type;
 
