@@ -52,9 +52,9 @@ public class IOSocket
      * @param ip
      * @param port 
      */
-    public void startConnection(String ip, int port)
+    public boolean startConnection(String ip, int port)
     {
-        this.startConnection(ip, port, 5000);
+        return this.startConnection(ip, port, 5000);
     }
     
     /**
@@ -63,46 +63,33 @@ public class IOSocket
      * @param port port on the remote device.
      * @param timeout in milliseconds
      */
-    public void startConnection(String ip, int port, int timeout)
+    public boolean startConnection(String ip, int port, int timeout)
     {
         try 
         {
-//            clientSocket = new Socket(ip, port);
             InetAddress address = InetAddress.getByName(ip);
             SocketAddress sockAddress = new InetSocketAddress(address,port);
             clientSocket = new Socket();
             clientSocket.connect(sockAddress, timeout);
+            out = new DataOutputStream(clientSocket.getOutputStream());
+            in = new DataInputStream(clientSocket.getInputStream());
         } 
         catch (SocketTimeoutException ex)
         {
             System.err.println("**warn: host '" + ip + "' is not responding "
                     + "within " + timeout + " milliseconds.");
-            System.exit(11);
+            return false;
         } 
         catch (UnknownHostException ex)
         {
             System.err.println("***error: unknown host '" + ip + "'.");
-            System.exit(12);
+            return false;
         } 
         catch (IOException ex)
         {
             Logger.getLogger(IOSocket.class.getName()).log(Level.SEVERE, null, ex);
         }
-        try 
-        {
-            out = new DataOutputStream(clientSocket.getOutputStream());
-        } 
-        catch (IOException ex) {
-            Logger.getLogger(IOSocket.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        try 
-        {
-            in = new DataInputStream(clientSocket.getInputStream());
-        } 
-        catch (IOException ex) 
-        {
-            Logger.getLogger(IOSocket.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        return true;
     }
     
     /**

@@ -298,7 +298,10 @@ public abstract class CustomerGate
         public String queryGate()
         {
             IOSocket socket = new IOSocket();
-            socket.startConnection(this.ip.getIp(), this.ip.getPort());
+            if (! socket.startConnection(this.ip.getIp(), this.ip.getPort()))
+            {
+                return this.formatter.format("");
+            }
             socket.sendMessage(this.QUERY.getMessage());
             try 
             {
@@ -409,7 +412,10 @@ public abstract class CustomerGate
         public String queryGate()
         {
             IOSocket socket = new IOSocket();
-            socket.startConnection(this.ip.getIp(), this.ip.getPort());
+            if (! socket.startConnection(this.ip.getIp(), this.ip.getPort()))
+            {
+                return this.formatter.format("");
+            }
             socket.sendMessage(this.QUERY.getMessage());
             try 
             {

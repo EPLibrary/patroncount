@@ -45,7 +45,7 @@ import org.apache.commons.cli.ParseException;
 public class Patroncount
 {
     private static boolean DEBUG;
-    private final static String VERSION = "1.1";
+    private final static String VERSION = "1.2.1";
 
     public static void displayHelp(int i)
     {
