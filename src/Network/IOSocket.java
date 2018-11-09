@@ -20,7 +20,12 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.util.Formatter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,24 +47,60 @@ public class IOSocket
     private DataOutputStream out;
     private InputStream in;
  
+    /**
+     * Starts the connection to remote device with a default timeout of 15 seconds.
+     * @param ip
+     * @param port 
+     */
     public void startConnection(String ip, int port)
+    {
+        this.startConnection(ip, port, 5000);
+    }
+    
+    /**
+     * Starts connection to the remote device.
+     * @param ip host or IP of the remote device.
+     * @param port port on the remote device.
+     * @param timeout in milliseconds
+     */
+    public void startConnection(String ip, int port, int timeout)
     {
         try 
         {
-            clientSocket = new Socket(ip, port);
-        } catch (IOException ex) {
+//            clientSocket = new Socket(ip, port);
+            InetAddress address = InetAddress.getByName(ip);
+            SocketAddress sockAddress = new InetSocketAddress(address,port);
+            clientSocket = new Socket();
+            clientSocket.connect(sockAddress, timeout);
+        } 
+        catch (SocketTimeoutException ex)
+        {
+            System.err.println("**warn: host '" + ip + "' is not responding "
+                    + "within " + timeout + " milliseconds.");
+            System.exit(11);
+        } 
+        catch (UnknownHostException ex)
+        {
+            System.err.println("***error: unknown host '" + ip + "'.");
+            System.exit(12);
+        } 
+        catch (IOException ex)
+        {
             Logger.getLogger(IOSocket.class.getName()).log(Level.SEVERE, null, ex);
         }
         try 
         {
             out = new DataOutputStream(clientSocket.getOutputStream());
-        } catch (IOException ex) {
+        } 
+        catch (IOException ex) {
             Logger.getLogger(IOSocket.class.getName()).log(Level.SEVERE, null, ex);
         }
         try 
         {
             in = new DataInputStream(clientSocket.getInputStream());
-        } catch (IOException ex) {
+        } 
+        catch (IOException ex) 
+        {
             Logger.getLogger(IOSocket.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
