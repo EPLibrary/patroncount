@@ -19,7 +19,6 @@ package patroncount;
 import RFIDEquipment.SupportedGateType;
 import RFIDEquipment.CustomerGate;
 import Network.GateIPv4;
-import RFIDEquipment.CustomerCountFormatter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.cli.BasicParser;
